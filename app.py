@@ -3,15 +3,21 @@ import requests
 from datetime import datetime, timedelta
 import json
 import os
-from database import get_annonces_du_jour, get_all_annonces, get_statistiques
+from database import get_annonces_du_jour, get_all_annonces, get_statistiques, init_database
 
 # Configuration pour Render
 app = Flask(__name__, 
            template_folder='templates',
            static_folder='static')
 
+# Configuration de la base de données
+DATABASE_URL = os.getenv('DATABASE_URL', 'annonces.db')
+
 # Pour Render - utiliser le port fourni par l'environnement
 port = int(os.environ.get('PORT', 5000))
+
+# Initialiser la base de données au démarrage
+init_database()
 
 @app.route('/')
 def index():
@@ -83,8 +89,18 @@ def get_quartiers():
 @app.route('/api/statistiques')
 def get_statistiques_api():
     """API pour récupérer les statistiques"""
-    stats = get_statistiques()
-    return jsonify({'statistiques': stats})
+    try:
+        stats = get_statistiques()
+        return jsonify({'statistiques': stats})
+    except Exception as e:
+        print(f"Erreur récupération statistiques: {e}")
+        return jsonify({'statistiques': {
+            'total_annonces': 0,
+            'annonces_aujourd_hui': 0,
+            'ventes': 0,
+            'locations': 0,
+            'quartiers_actifs': 0
+        }})
 
 # Route health check pour Render
 @app.route('/health')
@@ -108,9 +124,5 @@ def force_refresh():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
-    # Initialiser la base de données
-    from database import init_database
-    init_database()
-    
     # Configuration pour Render
     app.run(host='0.0.0.0', port=port, debug=False)
