@@ -3,6 +3,5 @@ requests==2.31.0
 python-dotenv==1.0.0
 gunicorn==21.2.0
 schedule==1.2.0
-sqlite3==latest  # Inclus avec Python
-beautifulsoup4==4.12.2  # Pour le scraping
-selenium==4.15.0  # Pour scraping avancé (optionnel)
+beautifulsoup4==4.12.2
+selenium==4.15.0
