@@ -1,0 +1,125 @@
+/* Styles personnalisés pour l'application */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.stats-badge {
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Cards */
+.annonce-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.annonce-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.annonce-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.annonce-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.annonce-type {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.type-vente {
+    background-color: #dc3545;
+    color: white;
+}
+
+.type-location {
+    background-color: #28a745;
+    color: white;
+}
+
+.annonce-quartier {
+    background-color: #6c757d;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Statistiques */
+.stat-item h4 {
+    font-weight: bold;
+}
+
+/* Loading spinner */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .annonce-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-badge {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation pour les nouveaux éléments */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Badges personnalisés */
+.badge-quartier {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-prix {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Images placeholder */
+.placeholder-img {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
