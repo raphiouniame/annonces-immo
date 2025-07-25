@@ -3,16 +3,22 @@ services:
     name: annonces-immobilieres-abidjan
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    startCommand: "python app.py"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.16  # ← CORRIGÉ ICI
+        value: 3.9.16
+      - key: DATABASE_URL
+        value: annonces.db
+    # Ajouter un health check
+    healthCheckPath: /health
 
-  - type: worker
-    name: annonce-scraper
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python scraper.py"
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.16  # ← CORRIGÉ ICI
+  # Optionnel : Service worker pour le scraping automatique
+  # Décommentez si vous voulez le scraping automatique
+  # - type: worker
+  #   name: annonce-scraper
+  #   env: python
+  #   buildCommand: "pip install -r requirements.txt"
+  #   startCommand: "python scraper.py"
+  #   envVars:
+  #     - key: PYTHON_VERSION
+  #       value: 3.9.16

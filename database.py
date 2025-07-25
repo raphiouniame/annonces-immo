@@ -10,6 +10,13 @@ def get_db_path():
         return DATABASE_URL[10:]  # Supprime 'sqlite:///'
     return DATABASE_URL
 
+def get_db_connection():
+    """Obtenir une connexion à la base de données"""
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row  # Pour pouvoir accéder aux colonnes par nom
+    return conn
+
 def init_database():
     """Initialise la base de données et crée les tables si nécessaire"""
     try:
@@ -43,6 +50,145 @@ def init_database():
     except Exception as e:
         print(f"❌ Erreur initialisation base de données : {e}")
         return False
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+def save_annonce(annonce):
+    """Sauvegarder une annonce dans la base de données"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT OR IGNORE INTO annonces (
+                id, titre, description, prix, type, quartier, 
+                surface, chambres, date_publication, date_recuperation, 
+                source, url
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            annonce.get('id'),
+            annonce.get('titre'),
+            annonce.get('description'),
+            annonce.get('prix'),
+            annonce.get('type'),
+            annonce.get('quartier'),
+            annonce.get('surface'),
+            annonce.get('chambres'),
+            annonce.get('date_publication'),
+            datetime.now().isoformat(),
+            annonce.get('source'),
+            annonce.get('url')
+        ))
+        
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Erreur sauvegarde annonce: {e}")
+        return False
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+def get_annonces_du_jour():
+    """Récupérer les annonces du jour"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        today = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute('''
+            SELECT * FROM annonces 
+            WHERE date_publication = ? 
+            ORDER BY date_recuperation DESC
+        ''', (today,))
+        
+        rows = cursor.fetchall()
+        annonces = []
+        for row in rows:
+            annonce = dict(row)
+            # Ajouter une image par défaut si pas d'image
+            annonce['image'] = 'https://via.placeholder.com/300x200?text=Immobilier'
+            annonces.append(annonce)
+        
+        return annonces
+    except Exception as e:
+        print(f"Erreur récupération annonces du jour: {e}")
+        return []
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+def get_all_annonces():
+    """Récupérer toutes les annonces"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM annonces 
+            ORDER BY date_recuperation DESC
+        ''')
+        
+        rows = cursor.fetchall()
+        annonces = []
+        for row in rows:
+            annonce = dict(row)
+            # Ajouter une image par défaut si pas d'image
+            annonce['image'] = 'https://via.placeholder.com/300x200?text=Immobilier'
+            annonces.append(annonce)
+        
+        return annonces
+    except Exception as e:
+        print(f"Erreur récupération toutes annonces: {e}")
+        return []
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+def get_statistiques():
+    """Récupérer les statistiques des annonces"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Total des annonces
+        cursor.execute('SELECT COUNT(*) FROM annonces')
+        total_annonces = cursor.fetchone()[0]
+        
+        # Annonces d'aujourd'hui
+        today = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute('SELECT COUNT(*) FROM annonces WHERE date_publication = ?', (today,))
+        annonces_aujourd_hui = cursor.fetchone()[0]
+        
+        # Ventes
+        cursor.execute("SELECT COUNT(*) FROM annonces WHERE type = 'vente'")
+        ventes = cursor.fetchone()[0]
+        
+        # Locations
+        cursor.execute("SELECT COUNT(*) FROM annonces WHERE type = 'location'")
+        locations = cursor.fetchone()[0]
+        
+        # Quartiers actifs
+        cursor.execute('SELECT COUNT(DISTINCT quartier) FROM annonces')
+        quartiers_actifs = cursor.fetchone()[0]
+        
+        return {
+            'total_annonces': total_annonces,
+            'annonces_aujourd_hui': annonces_aujourd_hui,
+            'ventes': ventes,
+            'locations': locations,
+            'quartiers_actifs': quartiers_actifs
+        }
+    except Exception as e:
+        print(f"Erreur récupération statistiques: {e}")
+        return {
+            'total_annonces': 0,
+            'annonces_aujourd_hui': 0,
+            'ventes': 0,
+            'locations': 0,
+            'quartiers_actifs': 0
+        }
     finally:
         if 'conn' in locals():
             conn.close()
