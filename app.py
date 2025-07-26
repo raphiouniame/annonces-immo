@@ -127,7 +127,7 @@ def force_refresh():
     ensure_database_initialized()
     try:
         # Importer et exécuter le scraper
-        from scraper import fetch_daily_ads
+        from real_scraper import fetch_daily_ads
         annonces = fetch_daily_ads()
         return jsonify({
             'status': 'success',

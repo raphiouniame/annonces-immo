@@ -18,7 +18,7 @@ def initialize_with_sample_data():
     
     try:
         from database import init_database
-        from scraper import fetch_daily_ads
+        from real_scraper import fetch_daily_ads
         
         # Initialiser la base de données
         print("📊 Initialisation de la base de données...")
@@ -40,7 +40,7 @@ def start_periodic_scraper():
         while True:
             try:
                 print("🔄 Exécution du scraper automatique...")
-                from scraper import fetch_daily_ads
+                from real_scraper import fetch_daily_ads
                 annonces = fetch_daily_ads()
                 print(f"✅ Scraper terminé: {len(annonces)} annonces")
                 
