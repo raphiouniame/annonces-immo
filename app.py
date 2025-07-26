@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import json
 import os
 from database import get_annonces_du_jour, get_all_annonces, get_statistiques, init_database
+import threading
 
 # Configuration pour Render
 app = Flask(__name__, 
@@ -13,37 +14,29 @@ app = Flask(__name__,
 # Configuration de la base de données
 DATABASE_URL = os.getenv('DATABASE_URL', 'annonces.db')
 
-# Initialiser la base de données au démarrage
-init_database()
+# Variable pour s'assurer que l'initialisation ne se fait qu'une fois
+_initialized = False
+_init_lock = threading.Lock()
 
-# Peupler la DB avec des données de test au démarrage si elle est vide
-@app.before_first_request
-def initialize_data():
-    """Initialiser avec des données de test si la DB est vide"""
-    try:
-        from database import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM annonces')
-        count = cursor.fetchone()[0]
-        conn.close()
-        
-        if count == 0:
-            print("🔄 Base de données vide, ajout de données de test...")
-            from scraper import fetch_daily_ads
-            fetch_daily_ads()
-            print("✅ Données de test ajoutées")
-    except Exception as e:
-        print(f"❌ Erreur initialisation données: {e}")
+def ensure_database_initialized():
+    """Initialise la base de données de manière thread-safe"""
+    global _initialized
+    if not _initialized:
+        with _init_lock:
+            if not _initialized:
+                init_database()
+                _initialized = True
 
 @app.route('/')
 def index():
     """Page d'accueil avec interface responsive"""
+    ensure_database_initialized()
     return render_template('index.html')
 
 @app.route('/api/annonces')
 def get_annonces():
     """API pour récupérer toutes les annonces"""
+    ensure_database_initialized()
     quartier = request.args.get('quartier', '').lower()
     type_annonce = request.args.get('type', '').lower()
     
@@ -66,15 +59,11 @@ def get_annonces():
 @app.route('/api/annonces/du-jour')
 def get_annonces_du_jour_api():
     """API pour récupérer uniquement les annonces du jour"""
+    ensure_database_initialized()
     quartier = request.args.get('quartier', '').lower()
     type_annonce = request.args.get('type', '').lower()
     
     annonces = get_annonces_du_jour()
-    
-    # Si pas d'annonces du jour, prendre toutes les annonces comme fallback
-    if not annonces:
-        print("🔄 Pas d'annonces du jour, récupération de toutes les annonces...")
-        annonces = get_all_annonces()
     
     # Filtrer par quartier
     if quartier:
@@ -111,6 +100,7 @@ def get_quartiers():
 @app.route('/api/statistiques')
 def get_statistiques_api():
     """API pour récupérer les statistiques"""
+    ensure_database_initialized()
     try:
         stats = get_statistiques()
         return jsonify({'statistiques': stats})
@@ -127,12 +117,14 @@ def get_statistiques_api():
 # Route health check pour Render
 @app.route('/health')
 def health_check():
+    ensure_database_initialized()
     return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
 
 # Route pour forcer l'actualisation (pour tests)
 @app.route('/admin/actualiser')
 def force_refresh():
     """Route pour forcer l'actualisation des annonces"""
+    ensure_database_initialized()
     try:
         # Importer et exécuter le scraper
         from scraper import fetch_daily_ads
@@ -144,28 +136,6 @@ def force_refresh():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-# Route de debug pour voir le contenu de la DB
-@app.route('/debug/db')
-def debug_db():
-    """Route de debug pour voir le contenu de la base de données"""
-    try:
-        from database import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM annonces')
-        count = cursor.fetchone()[0]
-        
-        cursor.execute('SELECT * FROM annonces LIMIT 5')
-        sample = cursor.fetchall()
-        conn.close()
-        
-        return jsonify({
-            'total_annonces': count,
-            'sample_annonces': [dict(row) for row in sample]
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Configuration pour le développement local et Render

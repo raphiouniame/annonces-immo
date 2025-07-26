@@ -3,7 +3,7 @@ services:
     name: annonces-immobilieres-abidjan
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    startCommand: "gunicorn wsgi:app"
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
@@ -11,17 +11,14 @@ services:
         value: annonces.db
     healthCheckPath: /health
 
-# Commenté le worker pour éviter les problèmes sur Render
-# Vous pouvez utiliser la route /admin/actualiser pour peupler la DB manuellement
-# ou utiliser un cron job externe
-
-# - type: worker
-#   name: annonce-scraper
-#   env: python
-#   buildCommand: "pip install -r requirements.txt"
-#   startCommand: "python scraper.py"
-#   envVars:
-#     - key: PYTHON_VERSION
-#       value: 3.9.16
-#     - key: DATABASE_URL
-#       value: annonces.db
+  # Service worker pour le scraping automatique
+  - type: worker
+    name: annonce-scraper
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python scraper.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: DATABASE_URL
+        value: annonces.db
