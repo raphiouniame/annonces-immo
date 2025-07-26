@@ -193,3 +193,78 @@ function createAnnonceCard(annonce) {
         </div>
     `;
 }
+
+// Formater le prix
+function formatPrice(prix) {
+    if (!prix) return 'Prix sur demande';
+    
+    const prixNum = parseInt(prix);
+    if (isNaN(prixNum)) return prix;
+    
+    // Formater en FCFA
+    return new Intl.NumberFormat('fr-FR').format(prixNum) + ' FCFA';
+}
+
+// Formater la date
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    
+    const date = new Date(dateStr);
+    const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    };
+    return date.toLocaleDateString('fr-FR', options);
+}
+
+// Mettre à jour les informations de résultats
+function updateResultsInfo(count, quartier, type) {
+    const resultsCount = document.getElementById('results-count');
+    const resultsTitle = document.getElementById('results-title');
+    
+    if (resultsCount) {
+        resultsCount.textContent = count;
+    }
+    
+    if (resultsTitle) {
+        let title = 'Toutes les annonces';
+        if (quartier || type) {
+            title = 'Résultats de recherche';
+        }
+        resultsTitle.textContent = title;
+    }
+}
+
+// Afficher le spinner de chargement
+function showLoading() {
+    const container = document.getElementById('annonces-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2">Chargement des annonces...</p>
+        </div>
+    `;
+}
+
+// Afficher une erreur
+function showError() {
+    const container = document.getElementById('annonces-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h4 class="text-muted">Erreur de chargement</h4>
+            <p class="text-muted">Impossible de charger les annonces. Veuillez réessayer.</p>
+            <button class="btn btn-primary" onclick="loadAnnonces()">
+                <i class="fas fa-refresh me-1"></i>
+                Réessayer
+            </button>
+        </div>
+    `;
+}

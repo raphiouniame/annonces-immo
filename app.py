@@ -16,6 +16,26 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'annonces.db')
 # Initialiser la base de données au démarrage
 init_database()
 
+# Peupler la DB avec des données de test au démarrage si elle est vide
+@app.before_first_request
+def initialize_data():
+    """Initialiser avec des données de test si la DB est vide"""
+    try:
+        from database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM annonces')
+        count = cursor.fetchone()[0]
+        conn.close()
+        
+        if count == 0:
+            print("🔄 Base de données vide, ajout de données de test...")
+            from scraper import fetch_daily_ads
+            fetch_daily_ads()
+            print("✅ Données de test ajoutées")
+    except Exception as e:
+        print(f"❌ Erreur initialisation données: {e}")
+
 @app.route('/')
 def index():
     """Page d'accueil avec interface responsive"""
@@ -50,6 +70,11 @@ def get_annonces_du_jour_api():
     type_annonce = request.args.get('type', '').lower()
     
     annonces = get_annonces_du_jour()
+    
+    # Si pas d'annonces du jour, prendre toutes les annonces comme fallback
+    if not annonces:
+        print("🔄 Pas d'annonces du jour, récupération de toutes les annonces...")
+        annonces = get_all_annonces()
     
     # Filtrer par quartier
     if quartier:
@@ -119,6 +144,28 @@ def force_refresh():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# Route de debug pour voir le contenu de la DB
+@app.route('/debug/db')
+def debug_db():
+    """Route de debug pour voir le contenu de la base de données"""
+    try:
+        from database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM annonces')
+        count = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT * FROM annonces LIMIT 5')
+        sample = cursor.fetchall()
+        conn.close()
+        
+        return jsonify({
+            'total_annonces': count,
+            'sample_annonces': [dict(row) for row in sample]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Configuration pour le développement local et Render
