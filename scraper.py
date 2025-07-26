@@ -9,6 +9,30 @@ import random
 # Initialiser la base de données
 init_database()
 
+def generate_fake_contact():
+    """Générer des contacts fictifs pour les annonces de démonstration"""
+    noms = ['Kouassi Jean', 'Adjoua Marie', 'Koffi Paul', 'Akissi Sandra', 'Yao Michel', 
+            'Ama Fatou', 'Ouattara Ali', 'Diabaté Sekou', 'N\'Guessan Eric', 'Bamba Salif']
+    
+    nom = random.choice(noms)
+    
+    # Générer un numéro ivoirien fictif
+    prefixes = ['07', '05', '01']  # Préfixes téléphoniques ivoiriens
+    numero = f"+225 {random.choice(prefixes)} {random.randint(10,99)} {random.randint(10,99)} {random.randint(10,99)}"
+    
+    # Email fictif
+    email = f"{nom.lower().replace(' ', '.')}@gmail.com"
+    
+    # WhatsApp (même numéro que le téléphone)
+    whatsapp = numero
+    
+    return {
+        'nom': nom,
+        'telephone': numero,
+        'email': email,
+        'whatsapp': whatsapp
+    }
+
 def scrape_tonkro():
     """Scraping basique de Tonkro.ci (à adapter selon le site réel)"""
     annonces = []
@@ -26,11 +50,12 @@ def scrape_tonkro():
         # Exemple de parsing (à adapter selon la structure réelle du site)
         # annonces_elements = soup.find_all('div', class_='annonce-item')
         
-        # Pour l'exemple, créons quelques annonces fictives
+        # Pour l'exemple, créons quelques annonces fictives avec contacts
         quartiers_abidjan = ['Plateau', 'Cocody', 'Treichville', 'Marcory', 'Yopougon']
         types = ['vente', 'location']
         
         for i in range(3):  # 3 annonces par exécution
+            contact = generate_fake_contact()
             annonce = {
                 'id': int(time.time() * 1000000) + i,  # ID unique
                 'titre': f"Appartement {random.randint(2,4)} pièces - {random.choice(quartiers_abidjan)}",
@@ -42,7 +67,11 @@ def scrape_tonkro():
                 'chambres': random.randint(1, 5),
                 'date_publication': datetime.now().strftime('%Y-%m-%d'),
                 'source': 'Tonkro.ci',
-                'url': f"https://tonkro.ci/annonce/{int(time.time() * 1000000) + i}"
+                'url': f"https://tonkro.ci/annonce/{int(time.time() * 1000000) + i}",
+                'contact_nom': contact['nom'],
+                'contact_telephone': contact['telephone'],
+                'contact_email': contact['email'],
+                'contact_whatsapp': contact['whatsapp']
             }
             annonces.append(annonce)
             
@@ -70,6 +99,7 @@ def scrape_jumia_deal():
         types = ['vente', 'location']
         
         for i in range(2):
+            contact = generate_fake_contact()
             annonce = {
                 'id': int(time.time() * 1000000) + 100 + i,
                 'titre': f"Villa {random.randint(3,6)} chambres - {random.choice(quartiers_abidjan)}",
@@ -81,7 +111,11 @@ def scrape_jumia_deal():
                 'chambres': random.randint(3, 6),
                 'date_publication': datetime.now().strftime('%Y-%m-%d'),
                 'source': 'Jumia Deal CI',
-                'url': f"https://deals.jumia.ci/annonce/{int(time.time() * 1000000) + 100 + i}"
+                'url': f"https://deals.jumia.ci/annonce/{int(time.time() * 1000000) + 100 + i}",
+                'contact_nom': contact['nom'],
+                'contact_telephone': contact['telephone'],
+                'contact_email': contact['email'],
+                'contact_whatsapp': contact['whatsapp']
             }
             annonces.append(annonce)
             
@@ -97,9 +131,9 @@ def scrape_afribaba():
     try:
         # Pour l'exemple, créons quelques annonces
         quartiers_abidjan = ['Bingerville', 'Anyama', 'Koumassi', 'Port-Bouet']
-        types = ['vente', 'location']
         
         for i in range(2):
+            contact = generate_fake_contact()
             annonce = {
                 'id': int(time.time() * 1000000) + 200 + i,
                 'titre': f"Terrain à vendre - {random.choice(quartiers_abidjan)}",
@@ -111,7 +145,11 @@ def scrape_afribaba():
                 'chambres': 0,
                 'date_publication': datetime.now().strftime('%Y-%m-%d'),
                 'source': 'Afribaba CI',
-                'url': f"https://ci.afribaba.com/annonce/{int(time.time() * 1000000) + 200 + i}"
+                'url': f"https://ci.afribaba.com/annonce/{int(time.time() * 1000000) + 200 + i}",
+                'contact_nom': contact['nom'],
+                'contact_telephone': contact['telephone'],
+                'contact_email': contact['email'],
+                'contact_whatsapp': contact['whatsapp']
             }
             annonces.append(annonce)
             
@@ -144,12 +182,15 @@ def main():
     """Fonction principale du scraper"""
     print("🚀 Démarrage du scraper d'annonces immobilières d'Abidjan")
     
+    # Exécuter une fois au démarrage
+    fetch_daily_ads()
+    
     # Boucle d'exécution
     while True:
         try:
-            annonces = fetch_daily_ads()
             print(f"⏰ Prochaine exécution dans 24 heures...")
             time.sleep(24 * 60 * 60)  # Attendre 24 heures
+            annonces = fetch_daily_ads()
         except KeyboardInterrupt:
             print("🛑 Scraper arrêté par l'utilisateur")
             break

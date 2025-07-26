@@ -13,9 +13,6 @@ app = Flask(__name__,
 # Configuration de la base de données
 DATABASE_URL = os.getenv('DATABASE_URL', 'annonces.db')
 
-# Pour Render - utiliser le port fourni par l'environnement
-port = int(os.environ.get('PORT', 5000))
-
 # Initialiser la base de données au démarrage
 init_database()
 
@@ -124,5 +121,6 @@ def force_refresh():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
-    # Configuration pour Render
+    # Configuration pour le développement local et Render
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)

@@ -69,6 +69,53 @@ header {
     font-size: 0.8rem;
 }
 
+/* Section Contact */
+.contact-section {
+    border: 1px solid #e9ecef;
+    background-color: #f8f9fa !important;
+}
+
+.contact-section h6 {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.contact-info {
+    font-size: 0.85rem;
+}
+
+.contact-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.contact-buttons .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+}
+
+.contact-buttons .btn i {
+    font-size: 0.7rem;
+}
+
+/* Boutons de contact spécifiques */
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-outline-success:hover {
+    background-color: #25d366;
+    border-color: #25d366;
+}
+
+.btn-outline-info:hover {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
 /* Statistiques */
 .stat-item h4 {
     font-weight: bold;
@@ -94,6 +141,15 @@ header {
     
     .stats-badge {
         font-size: 0.9rem;
+    }
+    
+    .contact-buttons {
+        justify-content: center;
+    }
+    
+    .contact-buttons .btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
     }
 }
 
@@ -122,4 +178,32 @@ header {
 .placeholder-img {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
+}
+
+/* Amélioration de l'affichage des contacts */
+.contact-section strong {
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* Hover effects pour les boutons de contact */
+.contact-buttons .btn {
+    transition: all 0.2s ease;
+}
+
+.contact-buttons .btn:hover {
+    transform: scale(1.05);
+}
+
+/* Styles pour les icônes Font Awesome */
+.fab.fa-whatsapp {
+    color: #25d366;
+}
+
+.fas.fa-phone {
+    color: #0d6efd;
+}
+
+.fas.fa-envelope {
+    color: #17a2b8;
 }

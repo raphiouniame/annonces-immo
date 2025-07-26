@@ -27,22 +27,58 @@ def init_database():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS annonces (
-                id INTEGER PRIMARY KEY,
-                titre TEXT,
-                description TEXT,
-                prix TEXT,
-                type TEXT,
-                quartier TEXT,
-                surface TEXT,
-                chambres INTEGER,
-                date_publication DATE,
-                date_recuperation DATETIME,
-                source TEXT,
-                url TEXT UNIQUE
-            )
-        ''')
+        # Supprimer l'ancienne table si elle existe (pour la migration)
+        cursor.execute('DROP TABLE IF EXISTS annonces_old')
+        
+        # Vérifier si la colonne contact existe déjà
+        cursor.execute("PRAGMA table_info(annonces)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        # Si la table n'existe pas ou n'a pas la colonne contact, la recréer
+        if 'contact_nom' not in columns:
+            # Sauvegarder les données existantes si la table existe
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='annonces'")
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                cursor.execute('ALTER TABLE annonces RENAME TO annonces_old')
+            
+            # Créer la nouvelle table avec les colonnes de contact
+            cursor.execute('''
+                CREATE TABLE annonces (
+                    id INTEGER PRIMARY KEY,
+                    titre TEXT,
+                    description TEXT,
+                    prix TEXT,
+                    type TEXT,
+                    quartier TEXT,
+                    surface TEXT,
+                    chambres INTEGER,
+                    date_publication DATE,
+                    date_recuperation DATETIME,
+                    source TEXT,
+                    url TEXT UNIQUE,
+                    contact_nom TEXT,
+                    contact_telephone TEXT,
+                    contact_email TEXT,
+                    contact_whatsapp TEXT
+                )
+            ''')
+            
+            # Migrer les données de l'ancienne table si elle existait
+            if table_exists:
+                cursor.execute('''
+                    INSERT INTO annonces (
+                        id, titre, description, prix, type, quartier, 
+                        surface, chambres, date_publication, date_recuperation, 
+                        source, url
+                    )
+                    SELECT id, titre, description, prix, type, quartier, 
+                           surface, chambres, date_publication, date_recuperation, 
+                           source, url
+                    FROM annonces_old
+                ''')
+                cursor.execute('DROP TABLE annonces_old')
         
         conn.commit()
         print(f"✅ Base de données initialisée : {db_path}")
@@ -64,8 +100,9 @@ def save_annonce(annonce):
             INSERT OR IGNORE INTO annonces (
                 id, titre, description, prix, type, quartier, 
                 surface, chambres, date_publication, date_recuperation, 
-                source, url
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                source, url, contact_nom, contact_telephone, 
+                contact_email, contact_whatsapp
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             annonce.get('id'),
             annonce.get('titre'),
@@ -78,7 +115,11 @@ def save_annonce(annonce):
             annonce.get('date_publication'),
             datetime.now().isoformat(),
             annonce.get('source'),
-            annonce.get('url')
+            annonce.get('url'),
+            annonce.get('contact_nom'),
+            annonce.get('contact_telephone'),
+            annonce.get('contact_email'),
+            annonce.get('contact_whatsapp')
         ))
         
         conn.commit()

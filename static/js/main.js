@@ -134,7 +134,7 @@ function createAnnonceCard(annonce) {
                         <span class="badge bg-secondary">${annonce.surface}</span>
                     </div>
                     
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between mb-3">
                         <span class="badge badge-quartier">
                             <i class="fas fa-map-marker-alt me-1"></i>
                             ${annonce.quartier}
@@ -147,6 +147,43 @@ function createAnnonceCard(annonce) {
                         }
                     </div>
                     
+                    <!-- Section Contact -->
+                    <div class="contact-section bg-light p-2 rounded mb-2">
+                        <h6 class="mb-2 text-primary">
+                            <i class="fas fa-user me-1"></i>
+                            Contact
+                        </h6>
+                        <div class="contact-info">
+                            <div class="mb-1">
+                                <strong>${annonce.contact_nom || 'Propriétaire'}</strong>
+                            </div>
+                            <div class="contact-buttons">
+                                ${annonce.contact_telephone ? 
+                                    `<a href="tel:${annonce.contact_telephone}" 
+                                       class="btn btn-sm btn-outline-primary me-1 mb-1">
+                                        <i class="fas fa-phone me-1"></i>
+                                        Appeler
+                                    </a>` : ''
+                                }
+                                ${annonce.contact_whatsapp ? 
+                                    `<a href="https://wa.me/${annonce.contact_whatsapp.replace(/\D/g, '')}" 
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-success me-1 mb-1">
+                                        <i class="fab fa-whatsapp me-1"></i>
+                                        WhatsApp
+                                    </a>` : ''
+                                }
+                                ${annonce.contact_email ? 
+                                    `<a href="mailto:${annonce.contact_email}" 
+                                       class="btn btn-sm btn-outline-info mb-1">
+                                        <i class="fas fa-envelope me-1"></i>
+                                        Email
+                                    </a>` : ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="mt-3 small text-muted">
                         <i class="fas fa-calendar me-1"></i>
                         Publié le ${formatDate(annonce.date_publication)}
@@ -155,72 +192,4 @@ function createAnnonceCard(annonce) {
             </div>
         </div>
     `;
-}
-
-// Formater le prix en FCFA
-function formatPrice(price) {
-    const numPrice = parseInt(price);
-    if (isNaN(numPrice)) return price;
-    
-    // Si c'est un prix de location (moins de 1 million), c'est par mois
-    if (numPrice < 1000000) {
-        return `${numPrice.toLocaleString('fr-FR')} FCFA/mois`;
-    } else {
-        return `${(numPrice / 1000000).toFixed(1)} M FCFA`;
-    }
-}
-
-// Formater la date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR');
-}
-
-// Mettre à jour les informations de résultats
-function updateResultsInfo(count, quartier, type) {
-    const countElement = document.getElementById('results-count');
-    const titleElement = document.getElementById('results-title');
-    
-    if (countElement) {
-        countElement.textContent = count;
-    }
-    
-    if (titleElement) {
-        let title = 'Annonces trouvées';
-        if (quartier) title += ` à ${quartier.charAt(0).toUpperCase() + quartier.slice(1)}`;
-        if (type) title += ` en ${type}`;
-        titleElement.textContent = title;
-    }
-}
-
-// Afficher le loader
-function showLoading() {
-    const container = document.getElementById('annonces-container');
-    if (container) {
-        container.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                </div>
-                <p class="mt-2">Chargement des annonces...</p>
-            </div>
-        `;
-    }
-}
-
-// Afficher une erreur
-function showError() {
-    const container = document.getElementById('annonces-container');
-    if (container) {
-        container.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                <h4 class="text-danger">Erreur de chargement</h4>
-                <p class="text-muted">Impossible de charger les annonces. Veuillez réessayer.</p>
-                <button class="btn btn-outline-primary" onclick="loadAnnonces()">
-                    <i class="fas fa-redo me-1"></i> Réessayer
-                </button>
-            </div>
-        `;
-    }
 }
