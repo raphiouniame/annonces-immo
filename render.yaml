@@ -3,20 +3,24 @@ services:
     name: annonces-immobilieres-abidjan
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn wsgi:app"
+    startCommand: "python start.py"
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
       - key: DATABASE_URL
         value: annonces.db
     healthCheckPath: /health
-
-  # Service worker pour le scraping automatique
-  - type: worker
-    name: annonce-scraper
+    # Configuration pour améliorer les performances
+    plan: starter
+    region: oregon
+    
+  # Tâche cron pour le scraping quotidien (optionnel)
+  - type: cron
+    name: daily-scraper
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python scraper.py"
+    startCommand: "python -c 'from scraper import fetch_daily_ads; fetch_daily_ads()'"
+    schedule: "0 6 * * *"  # Tous les jours à 6h
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
