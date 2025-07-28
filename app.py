@@ -31,92 +31,6 @@ def ensure_database_initialized():
                 else:
                     print("❌ Échec de l'initialisation de la base de données")
 
-@app.route('/')
-def index():
-    """Page d'accueil avec interface responsive"""
-    ensure_database_initialized()
-    return render_template('index.html')
-
-@app.route('/api/annonces')
-def get_annonces():
-    """API pour récupérer toutes les annonces"""
-    ensure_database_initialized()
-    quartier = request.args.get('quartier', '').lower()
-    type_annonce = request.args.get('type', '').lower()
-    
-    try:
-        annonces = get_all_annonces()
-        
-        # Filtrer par quartier
-        if quartier:
-            annonces = [a for a in annonces if quartier in a['quartier'].lower()]
-        
-        # Filtrer par type
-        if type_annonce:
-            annonces = [a for a in annonces if type_annonce in a['type'].lower()]
-        
-        return jsonify({
-            'annonces': annonces,
-            'total': len(annonces),
-            'date': datetime.now().isoformat()
-        })
-    except Exception as e:
-        print(f"Erreur récupération annonces: {e}")
-        return jsonify({
-            'annonces': [],
-            'total': 0,
-            'date': datetime.now().isoformat(),
-            'error': str(e)
-        })
-
-@app.route('/api/annonces/du-jour')
-def get_annonces_du_jour_api():
-    """API pour récupérer uniquement les annonces du jour"""
-    ensure_database_initialized()
-    quartier = request.args.get('quartier', '').lower()
-    type_annonce = request.args.get('type', '').lower()
-    
-    try:
-        annonces = get_annonces_du_jour()
-        
-        # Si pas d'annonces du jour, essayer de générer
-        if len(annonces) == 0:
-            print("⚠️ Aucune annonce du jour trouvée, tentative de génération...")
-            try:
-                from improved_scraper import fetch_daily_ads
-                nouvelles_annonces = fetch_daily_ads()
-                print(f"✅ {len(nouvelles_annonces)} nouvelles annonces générées")
-                # Récupérer à nouveau
-                annonces = get_annonces_du_jour()
-            except Exception as gen_error:
-                print(f"❌ Erreur génération annonces: {gen_error}")
-                # Retourner des annonces de test
-                annonces = generate_test_annonces()
-        
-        # Filtrer par quartier
-        if quartier:
-            annonces = [a for a in annonces if quartier in a['quartier'].lower()]
-        
-        # Filtrer par type
-        if type_annonce:
-            annonces = [a for a in annonces if type_annonce in a['type'].lower()]
-        
-        return jsonify({
-            'annonces': annonces,
-            'total': len(annonces),
-            'date': datetime.now().strftime('%Y-%m-%d'),
-            'ville': 'Abidjan'
-        })
-    except Exception as e:
-        print(f"Erreur récupération annonces du jour: {e}")
-        return jsonify({
-            'annonces': generate_test_annonces(),
-            'total': 4,
-            'date': datetime.now().strftime('%Y-%m-%d'),
-            'ville': 'Abidjan',
-            'error': str(e)
-        })
-
 def generate_test_annonces():
     """Génère des annonces de test si aucune donnée n'est disponible"""
     return [
@@ -194,6 +108,85 @@ def generate_test_annonces():
         }
     ]
 
+@app.route('/')
+def index():
+    """Page d'accueil avec interface responsive"""
+    ensure_database_initialized()
+    return render_template('index.html')
+
+@app.route('/api/annonces')
+def get_annonces():
+    """API pour récupérer toutes les annonces"""
+    ensure_database_initialized()
+    quartier = request.args.get('quartier', '').lower()
+    type_annonce = request.args.get('type', '').lower()
+    
+    try:
+        annonces = get_all_annonces()
+        # Filtrer par quartier
+        if quartier:
+            annonces = [a for a in annonces if quartier in a['quartier'].lower()]
+        # Filtrer par type
+        if type_annonce:
+            annonces = [a for a in annonces if type_annonce in a['type'].lower()]
+        return jsonify({
+            'annonces': annonces,
+            'total': len(annonces),
+            'date': datetime.now().isoformat()
+        })
+    except Exception as e:
+        print(f"Erreur récupération annonces: {e}")
+        return jsonify({
+            'annonces': [],
+            'total': 0,
+            'date': datetime.now().isoformat(),
+            'error': str(e)
+        })
+
+@app.route('/api/annonces/du-jour')
+def get_annonces_du_jour_api():
+    """API pour récupérer uniquement les annonces du jour"""
+    ensure_database_initialized()
+    quartier = request.args.get('quartier', '').lower()
+    type_annonce = request.args.get('type', '').lower()
+    
+    try:
+        annonces = get_annonces_du_jour()
+        # Si pas d'annonces du jour, essayer de générer
+        if len(annonces) == 0:
+            print("⚠️ Aucune annonce du jour trouvée, tentative de génération...")
+            try:
+                from improved_scraper import fetch_daily_ads
+                nouvelles_annonces = fetch_daily_ads()
+                print(f"✅ {len(nouvelles_annonces)} nouvelles annonces générées")
+                # Récupérer à nouveau
+                annonces = get_annonces_du_jour()
+            except Exception as gen_error:
+                print(f"❌ Erreur génération annonces: {gen_error}")
+                # Retourner des annonces de test
+                annonces = generate_test_annonces()
+        # Filtrer par quartier
+        if quartier:
+            annonces = [a for a in annonces if quartier in a['quartier'].lower()]
+        # Filtrer par type
+        if type_annonce:
+            annonces = [a for a in annonces if type_annonce in a['type'].lower()]
+        return jsonify({
+            'annonces': annonces,
+            'total': len(annonces),
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'ville': 'Abidjan'
+        })
+    except Exception as e:
+        print(f"Erreur récupération annonces du jour: {e}")
+        return jsonify({
+            'annonces': generate_test_annonces(),
+            'total': 4,
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'ville': 'Abidjan',
+            'error': str(e)
+        })
+
 @app.route('/api/annonces/<int:annonce_id>')
 def get_annonce(annonce_id):
     """API pour récupérer une annonce spécifique"""
@@ -216,7 +209,6 @@ def get_statistiques_api():
     ensure_database_initialized()
     try:
         stats = get_statistiques()
-        
         # Si pas de statistiques, en générer de base
         if stats['total_annonces'] == 0:
             stats = {
@@ -226,7 +218,6 @@ def get_statistiques_api():
                 'locations': 1,
                 'quartiers_actifs': 4
             }
-        
         return jsonify({'statistiques': stats})
     except Exception as e:
         print(f"Erreur récupération statistiques: {e}")

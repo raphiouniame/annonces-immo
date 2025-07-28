@@ -2,7 +2,6 @@
 """
 Script de démarrage pour initialiser l'application avec des données réalistes
 """
-
 import os
 import sys
 import threading
@@ -16,9 +15,9 @@ def initialize_with_realistic_data():
     """Initialise la base de données avec des données réalistes"""
     print("🚀 Initialisation de l'application...")
     print("📞 Génération avec de vrais formats de numéros ivoiriens")
-    
     try:
         from database import init_database
+        # Utiliser le scraper amélioré au lieu du real_scraper
         from improved_scraper import fetch_daily_ads
         
         # Initialiser la base de données
@@ -26,7 +25,7 @@ def initialize_with_realistic_data():
         if not init_database():
             print("❌ Échec initialisation base de données")
             return False
-        
+            
         # Générer des annonces réalistes
         print("📝 Génération d'annonces réalistes...")
         annonces = fetch_daily_ads()
@@ -45,7 +44,6 @@ def initialize_with_realistic_data():
         else:
             print("⚠️ Aucune annonce générée, génération manuelle...")
             return generate_manual_test_data()
-        
     except Exception as e:
         print(f"❌ Erreur lors de l'initialisation: {e}")
         print("🔧 Tentative de génération manuelle...")
@@ -55,7 +53,6 @@ def generate_manual_test_data():
     """Génère manuellement quelques annonces de test si le scraper échoue"""
     try:
         from database import save_annonce
-        
         test_annonces = [
             {
                 'id': int(time.time() * 1000000),
@@ -126,15 +123,12 @@ def generate_manual_test_data():
                 'contact_whatsapp': '22567334455'
             }
         ]
-        
         saved_count = 0
         for annonce in test_annonces:
             if save_annonce(annonce):
                 saved_count += 1
-        
         print(f"✅ {saved_count} annonces de test générées manuellement")
         return saved_count > 0
-        
     except Exception as e:
         print(f"❌ Erreur génération manuelle: {e}")
         return False
@@ -143,22 +137,19 @@ def start_periodic_scraper():
     """Démarre le générateur périodique en arrière-plan"""
     def run_generator():
         time.sleep(60)  # Attendre 1 minute avant la première exécution
-        
         while True:
             try:
                 print("🔄 Exécution du générateur automatique...")
                 from improved_scraper import fetch_daily_ads
                 annonces = fetch_daily_ads()
                 print(f"✅ Générateur terminé: {len(annonces)} annonces avec vrais numéros")
-                
                 # Attendre 6 heures avant la prochaine exécution
                 time.sleep(6 * 60 * 60)
-                
             except Exception as e:
                 print(f"❌ Erreur générateur: {e}")
                 # Attendre 1 heure en cas d'erreur
                 time.sleep(60 * 60)
-    
+                
     # Démarrer le générateur dans un thread séparé
     generator_thread = threading.Thread(target=run_generator, daemon=True)
     generator_thread.start()
@@ -166,26 +157,20 @@ def start_periodic_scraper():
 
 if __name__ == "__main__":
     print("🌟 Démarrage de l'application Annonces Immobilières Abidjan")
-    
     # Initialiser avec des données réalistes
     success = initialize_with_realistic_data()
-    
     if not success:
         print("❌ Échec total de l'initialisation des données")
         print("⚠️ L'application va démarrer sans données initiales")
-    
     # Démarrer l'application Flask
     print("📱 Import de l'application Flask...")
     from app import app
-    
     # Démarrer le générateur en arrière-plan
     start_periodic_scraper()
-    
     # Lancer l'application
     port = int(os.environ.get('PORT', 5000))
     print(f"🌐 Démarrage de l'application sur le port {port}")
     print(f"🔗 Application prête !")
-    
     # Pour le développement local
     if os.environ.get('FLASK_ENV') == 'development':
         print(f"🔗 URL locale: http://localhost:{port}")
