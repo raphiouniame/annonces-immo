@@ -13,16 +13,17 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 def initialize_with_realistic_data():
     """Initialise la base de données avec des données réalistes"""
-    print("🚀 Initialisation de l'application...")
+    print("🌟 Initialisation de l'application Annonces Immobilières Abidjan")
     print("📞 Génération avec de vrais formats de numéros ivoiriens")
     try:
         from database import init_database
-        # Utiliser le scraper amélioré au lieu du real_scraper
+        # Utiliser le scraper amélioré
         from improved_scraper import fetch_daily_ads
         
         # Initialiser la base de données
         print("📊 Initialisation de la base de données...")
-        if not init_database():
+        success = init_database()
+        if not success:
             print("❌ Échec initialisation base de données")
             return False
             
@@ -136,7 +137,8 @@ def generate_manual_test_data():
 def start_periodic_scraper():
     """Démarre le générateur périodique en arrière-plan"""
     def run_generator():
-        time.sleep(60)  # Attendre 1 minute avant la première exécution
+        # Attendre 1 minute avant la première exécution
+        time.sleep(60)
         while True:
             try:
                 print("🔄 Exécution du générateur automatique...")
@@ -156,25 +158,35 @@ def start_periodic_scraper():
     print("🤖 Générateur automatique démarré (première exec dans 1min, puis toutes les 6h)")
 
 if __name__ == "__main__":
-    print("🌟 Démarrage de l'application Annonces Immobilières Abidjan")
     # Initialiser avec des données réalistes
     success = initialize_with_realistic_data()
     if not success:
         print("❌ Échec total de l'initialisation des données")
         print("⚠️ L'application va démarrer sans données initiales")
+    
     # Démarrer l'application Flask
     print("📱 Import de l'application Flask...")
     from app import app
+    
     # Démarrer le générateur en arrière-plan
     start_periodic_scraper()
+    
     # Lancer l'application
     port = int(os.environ.get('PORT', 5000))
     print(f"🌐 Démarrage de l'application sur le port {port}")
     print(f"🔗 Application prête !")
+    
     # Pour le développement local
     if os.environ.get('FLASK_ENV') == 'development':
         print(f"🔗 URL locale: http://localhost:{port}")
         app.run(host='0.0.0.0', port=port, debug=True)
     else:
-        # Pour la production (Render)
-        app.run(host='0.0.0.0', port=port, debug=False)
+        # Pour la production (Render) - Laisser Gunicorn gérer l'application
+        # On garde le processus en vie sans démarrer Flask directement
+        print("✅ Initialisation terminée. En attente de requêtes via Gunicorn...")
+        try:
+            # Garder le thread principal actif
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\n Arrêt de l'application.")

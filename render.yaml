@@ -3,26 +3,40 @@ services:
     name: annonces-immobilieres-abidjan
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python start.py"
+    # Utiliser Gunicorn pour servir l'application Flask via le point d'entrée WSGI
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT wsgi:app"
     envVars:
+      # Spécifier explicitement la version de Python (doit être >= 3.7.3)
+      # Render utilisera cette valeur plutôt que celle de runtime.txt
       - key: PYTHON_VERSION
         value: 3.9.16
+      # Définir le chemin de la base de données SQLite
       - key: DATABASE_URL
         value: annonces.db
+      # Variable d'environnement pour indiquer l'environnement (optionnel mais utile)
+      - key: FLASK_ENV
+        value: production
+    # Chemin pour la vérification de l'état de santé de l'application
     healthCheckPath: /health
-    # Configuration pour améliorer les performances
+    # Plan de service (gratuit)
     plan: starter
+    # Région de déploiement
     region: oregon
-    
-  # Tâche cron pour le scraping quotidien (optionnel)
+
+  # Tâche cron pour le scraping/génération quotidienne
   - type: cron
     name: daily-scraper
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python -c 'from scraper import fetch_daily_ads; fetch_daily_ads()'"
-    schedule: "0 6 * * *"  # Tous les jours à 6h
+    # Exécuter la fonction fetch_daily_ads depuis improved_scraper.py
+    # Assurez-vous que le nom du fichier correspond à votre code
+    startCommand: "python -c 'from improved_scraper import fetch_daily_ads; fetch_daily_ads()'"
+    # Programmation: Tous les jours à 6h00 UTC (7h00 ou 19h00 en Côte d'Ivoire selon l'heure d'été)
+    schedule: "0 6 * * *"
     envVars:
+      # Même version de Python que le service web
       - key: PYTHON_VERSION
         value: 3.9.16
+      # Même chemin de base de données pour accéder aux mêmes données
       - key: DATABASE_URL
         value: annonces.db

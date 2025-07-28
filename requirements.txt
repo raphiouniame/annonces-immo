@@ -1,8 +1,10 @@
+# requirements.txt
 Flask==2.3.3
 requests==2.31.0
 python-dotenv==1.0.0
 gunicorn==21.2.0
-schedule==1.2.0
+# psycopg2-binary pour PostgreSQL
+psycopg2-binary==2.9.9
+# beautifulsoup4 n'est plus nécessaire si on ne scrape pas le web,
+# mais on le garde si improved_scraper.py l'utilise pour autre chose.
 beautifulsoup4==4.12.2
-# Suppression de selenium car il nécessite des drivers non disponibles sur Render
-# selenium==4.15.0
