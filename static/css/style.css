@@ -1,0 +1,209 @@
+/* Styles personnalisés pour l'application */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.stats-badge {
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Cards */
+.annonce-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.annonce-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.annonce-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.annonce-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.annonce-type {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.type-vente {
+    background-color: #dc3545;
+    color: white;
+}
+
+.type-location {
+    background-color: #28a745;
+    color: white;
+}
+
+.annonce-quartier {
+    background-color: #6c757d;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Section Contact */
+.contact-section {
+    border: 1px solid #e9ecef;
+    background-color: #f8f9fa !important;
+}
+
+.contact-section h6 {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.contact-info {
+    font-size: 0.85rem;
+}
+
+.contact-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.contact-buttons .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+}
+
+.contact-buttons .btn i {
+    font-size: 0.7rem;
+}
+
+/* Boutons de contact spécifiques */
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-outline-success:hover {
+    background-color: #25d366;
+    border-color: #25d366;
+}
+
+.btn-outline-info:hover {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+/* Statistiques */
+.stat-item h4 {
+    font-weight: bold;
+}
+
+/* Loading spinner */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .annonce-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-badge {
+        font-size: 0.9rem;
+    }
+    
+    .contact-buttons {
+        justify-content: center;
+    }
+    
+    .contact-buttons .btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* Animation pour les nouveaux éléments */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Badges personnalisés */
+.badge-quartier {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-prix {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Images placeholder */
+.placeholder-img {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* Amélioration de l'affichage des contacts */
+.contact-section strong {
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* Hover effects pour les boutons de contact */
+.contact-buttons .btn {
+    transition: all 0.2s ease;
+}
+
+.contact-buttons .btn:hover {
+    transform: scale(1.05);
+}
+
+/* Styles pour les icônes Font Awesome */
+.fab.fa-whatsapp {
+    color: #25d366;
+}
+
+.fas.fa-phone {
+    color: #0d6efd;
+}
+
+.fas.fa-envelope {
+    color: #17a2b8;
+}
